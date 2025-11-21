@@ -5,7 +5,7 @@ use App\Http\Controllers\ArticleController;
 
 
 // Routes pour les articles
-Route::resource('/articles', ArticleController::class)->except(['show']);
+Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
 
 // Route pour la suppression via AJAX
 Route::delete('articles/{article}', [ArticleController::class, 'destroy'])

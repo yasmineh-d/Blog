@@ -24,13 +24,10 @@ class ArticleController extends Controller
         return view('articles.index', compact('articles', 'categories', 'category'));
     }
 
+
     public function destroy(Article $article)
     {
-        try {
             $this->articleService->deleteArticle($article);
-            return response()->json(['success' => true, 'message' => 'Article supprimé avec succès.']);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Une erreur est survenue lors de la suppression.'], 500);
-        }
+            return redirect()->route ('articles.index')->with('success','article suprimer avec success');
     }
 }
