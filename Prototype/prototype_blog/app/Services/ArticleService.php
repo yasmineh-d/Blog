@@ -3,38 +3,31 @@
 namespace App\Services;
 
 use App\Models\Article;
-use App\Models\Tag;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ArticleService
 {
-    /**
-     * Récupère la liste des articles avec :
-     * - tri par date la plus récente (latest)
-     * - filtre par catégorie (tag)
-     * - pagination
-     */
-    public function getArticles($categoryId = null)
+    public function getFilteredArticles($category = null, $perPage = 10)
     {
-        // Prépare la requête avec relation tags chargée
-        $query = Article::with('tags')->latest();
+        $query = Article::with(['tags', 'user'])
+            ->latest();
 
-        // Si un filtre par catégorie est appliqué
-        if ($categoryId) {
-            $query->whereHas('tags', function ($q) use ($categoryId) {
-                $q->where('tags.id', $categoryId);
+        if ($category) {
+            $query->whereHas('tags', function($q) use ($category) {
+                $q->where('name', $category);
             });
         }
 
-        // Retourne les articles avec pagination (10 par page)
-        return $query->paginate(10);
+        return $query->paginate($perPage);
     }
 
-    /**
-     * Récupère toutes les catégories (tags)
-     * Pour l'affichage du filtre dans la vue Blade
-     */
-    public function getCategories()
+    public function deleteArticle(Article $article): bool
     {
-        return Tag::all();
+        return $article->delete();
+    }
+
+    public function getAllCategories()
+    {
+        return \App\Models\Tag::pluck('name')->unique();
     }
 }

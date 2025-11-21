@@ -3,51 +3,71 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
-use Illuminate\Http\Request;
 use App\Services\ArticleService;
+use Illuminate\Http\Request;
 
 class ArticleController extends Controller
 {
-    protected $service;
+    protected $articleService;
 
-    // Injection du ArticleService automatiquement par Laravel
-    public function __construct(ArticleService $service)
+    public function __construct(ArticleService $articleService)
     {
-        $this->service = $service;
+        $this->articleService = $articleService;
     }
 
-    /**
-     * Affiche la liste des articles.
-     * - Récupère les articles via le service
-     * - Récupère les catégories pour le filtre
-     * - Envoie les données vers la vue
-     */
     public function index(Request $request)
     {
-        // Récupère le filtre sélectionné (si existe)
-        $categoryId = $request->category;
+        $category = $request->query('category');
+        $articles = $this->articleService->getFilteredArticles($category);
+        $categories = $this->articleService->getAllCategories();
 
-        // Récupération des articles avec filtre + pagination
-        $articles = $this->service->getArticles($categoryId);
-
-        // Récupération des tags pour la liste déroulante
-        $categories = $this->service->getCategories();
-
-        // Envoie à la vue
-        return view('articles.index', compact('articles', 'categories'));
+        return view('articles.index', compact('articles', 'categories', 'category'));
     }
 
-    /**
-     * Supprime un article.
-     * - Supprime dans la BDD
-     * - Redirige avec message de succès
-     */
+    public function edit(Article $article)
+    {
+        $categories = \App\Models\Tag::all();
+        $article->load('tags');
+        return view('articles.edit', compact('article', 'categories'));
+    }
+
+    public function update(Request $request, Article $article)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:tags,id'
+        ]);
+
+        try {
+            // Mise à jour des champs de base
+            $article->update([
+                'title' => $validated['title'],
+                'content' => $validated['content']
+            ]);
+
+            // Mise à jour des tags
+            if (isset($validated['tags'])) {
+                $article->tags()->sync($validated['tags']);
+            } else {
+                $article->tags()->detach();
+            }
+
+            return redirect()->route('articles.index')
+                ->with('success', 'Article mis à jour avec succès.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Une erreur est survenue lors de la mise à jour.');
+        }
+    }
+
     public function destroy(Article $article)
     {
-        $article->delete();
-
-        return redirect()
-            ->route('articles.index')
-            ->with('status', 'Article supprimé avec succès !');
+        try {
+            $this->articleService->deleteArticle($article);
+            return response()->json(['success' => true, 'message' => 'Article supprimé avec succès.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Une erreur est survenue lors de la suppression.'], 500);
+        }
     }
 }
