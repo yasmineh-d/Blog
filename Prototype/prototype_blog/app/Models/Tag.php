@@ -17,3 +17,14 @@ class Tag extends Model
         return $this->belongsToMany(Article::class, 'article_tag', 'article_id', 'tag_id');
     }
 }
+
+    // Mass assignable attributes
+    use HasFactory;
+    protected $fillable = ['name'];
+
+    public function articles()
+    {
+        return $this->belongsToMany(Article::class);
+        // Un tag peut être sur plusieurs articles
+    }
+}
