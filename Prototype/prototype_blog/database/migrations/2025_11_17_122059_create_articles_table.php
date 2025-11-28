@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('Articles', function (Blueprint $table) {
+        Schema::create('articles', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('title', 180);
-            $table->string('slug', 200)->unique();
-            $table->text('excrept')->nullable();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('title',180);
+            $table->string('slug',200)->unique();
+            $table->text('excerpt')->nullable();
             $table->longText('content')->nullable();
+            $table->string('status')->default('draft');
             $table->timestamps();
         });
     }
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('Articles');
+        Schema::dropIfExists('articles');
     }
 };

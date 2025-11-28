@@ -2,18 +2,16 @@
 
 namespace Database\Factories;
 
-use App\Models\Tag;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use App\Models\Category;
 
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Tag>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Category>
  */
-class TagFactory extends Factory
+class CategoryFactory extends Factory
 {
-    protected $model = Tag::class;
-
     /**
      * Define the model's default state.
      *
@@ -21,12 +19,11 @@ class TagFactory extends Factory
      */
     public function definition(): array
     {
-        
         $name=fake()->unique()->word();
+
         return [
-             'name'=> $name,
+               'name'=> $name,
             'slug'=> Str::slug($name),
         ];
     }
 }
-
