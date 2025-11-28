@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 
+=======
+use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\User;
+use Illuminate\Support\Str;
+
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Article>
  */
@@ -27,6 +32,17 @@ class ArticleFactory extends Factory
             'excerpt'=>fake()->paragraph(2),
             'content'=>fake()->paragraphs(8, true),
 
+        ];
+    }
+}
+
+        $title = fake()->unique()->sentence(4);
+        return [
+            'user_id'=> User::inRandomOrder()->value('id') ?? 1,
+            'title'=> $title,
+            'slug'=> Str::slug($title),
+            'excrept'=>fake()->sentence(12),
+            'content'=> fake()->paragraphs(3, true),
         ];
     }
 }
